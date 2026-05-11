@@ -1,0 +1,71 @@
+Machine learning types include supervised, unsupervised, and reinforcement learning. Overfitting occurs when a model learns noise. FAISS is a library for similarity search. RAG combines LLMs with external knowledge retrieval. LangSmith provides tracing for LLM apps.
+Machine Learning is a branch of Artificial Intelligence that enables systems to learn patterns from data and improve performance without being explicitly programmed. It is widely used in applications such as recommendation systems, fraud detection, image recognition, and natural language processing. Common approaches include supervised learning, unsupervised learning, and reinforcement learning. Modern machine learning often relies on large datasets, statistical models, and powerful computing resources to train accurate predictive systems.
+Machine Learning allows computers to identify patterns in data and make predictions or decisions with minimal human intervention. It combines concepts from statistics, optimization, and computer science to build models that improve through experience. Popular algorithms include decision trees, neural networks, support vector machines, and clustering methods.
+In recent years, advances in Deep Learning have significantly improved capabilities in speech recognition, computer vision, and language understanding. Many modern AI systems are powered by large-scale machine learning models trained on massive datasets.
+Machine learning is commonly applied in healthcare, finance, cybersecurity, e-commerce, and autonomous vehicles. Businesses use it to automate tasks, personalize user experiences, and uncover insights hidden within large amounts of data.
+A typical machine learning workflow includes data collection, preprocessing, model training, evaluation, and deployment. The quality of the training data often has a major impact on the final model performance.
+Researchers continue to explore areas such as explainable AI, ethical AI, and federated learning to make machine learning systems more transparent, secure, and efficient.
+Machine Learning consists of Supervised, Unsupervised, and Reinforcement learning. 
+Overfitting happens when a model learns noise in the training data. 
+Bias-variance tradeoff balances underfitting and overfitting. 
+Regularization uses L1 and L2 penalties to prevent complexity. 
+Cross-validation uses folds to estimate performance. 
+Backpropagation uses the chain rule for gradients. 
+CNNs are for grid-like data like images. 
+LSTMs use gates for vanishing gradients. 
+Activation functions include ReLU, Sigmoid, and Tanh. 
+Pooling layers in CNNs reduce spatial dimensions. 
+Transformers use self-attention and parallel processing. 
+Word embeddings are dense semantic vectors. 
+Transfer learning uses pre-trained models on new tasks. 
+BERT is a bidirectional transformer with masked language modeling. 
+GPT is an autoregressive model trained on massive text. 
+Instruction tuning aligns LLMs with human intent. 
+RLHF uses human feedback for helpfulness and safety. 
+Chain-of-thought prompting shows step-by-step reasoning. 
+GPT-4 context length is up to 128K tokens. 
+RAG combines generative LLMs with external knowledge bases. 
+Dense retrieval uses neural embeddings and cosine similarity. 
+FAISS is a library for efficient similarity search. 
+HNSW uses hierarchical graphs for ANN search. 
+Hybrid search combines dense and sparse (BM25) search. 
+LangChain is a framework for chains, agents, and data. 
+LCEL is a declarative language for composing chains. 
+LangGraph handles stateful multi-actor applications. 
+LangSmith is a platform for debugging and monitoring LLM apps. 
+Prompt Hub is a repository for versioning prompt templates. 
+RAGAS evaluates faithfulness, relevancy, recall, and precision. 
+Guardrails AI adds validation and safety checks to outputs. 
+PII is Personally Identifiable Information like emails or SSNs.
+Machine Learning types: Supervised (labeled data), Unsupervised (unlabeled), and Reinforcement (trial/error). 
+Overfitting: When a model learns noise/details of training data to the extent it negatively impacts performance on new data. 
+Bias-variance tradeoff: The conflict in trying to simultaneously minimize two sources of error.
+Regularization: Techniques like L1/L2 that add a penalty to the loss function to prevent overfitting.
+Cross-validation: A technique to evaluate model performance by splitting data into folds.
+Backpropagation: The primary algorithm for training neural networks using gradients and the chain rule.
+CNNs (Convolutional Neural Networks): Primarily used for image processing and grid-like data.
+LSTMs (Long Short-Term Memory): A type of RNN that solves the vanishing gradient problem using gates.
+Activation Functions: ReLU, Sigmoid, and Tanh introduce non-linearity into the network.
+Pooling layers: Used in CNNs to reduce spatial dimensions and computational load.
+Transformer: An architecture using self-attention introduced in 'Attention Is All You Need' (2017).
+Word Embeddings: Numerical representations of words (vectors) that capture semantic meaning.
+Transfer Learning: Reusing a pre-trained model on a new, related task.
+BERT: Bidirectional Encoder Representations from Transformers, used for NLP understanding.
+GPT: Generative Pre-trained Transformer, an autoregressive model for text generation.
+Instruction Tuning: Fine-tuning LLMs to follow specific prompts or instructions.
+RLHF: Reinforcement Learning from Human Feedback, used to align LLMs with human values.
+Chain-of-thought: Prompting that encourages the model to show step-by-step reasoning.
+GPT-4 context length: Supports up to 128K tokens.
+RAG (Retrieval-Augmented Generation): Combines LLMs with external knowledge bases.
+Dense Retrieval: Uses vector embeddings and similarity search (like cosine similarity).
+FAISS: A library developed by Facebook for efficient similarity search of dense vectors.
+HNSW: Hierarchical Navigable Small Worlds, an algorithm for approximate nearest neighbors.
+Hybrid Search: Combines keyword search (BM25) and vector search using RRF.
+LangChain: An open-source framework for building applications powered by LLMs.
+LCEL: LangChain Expression Language, a declarative way to compose chains.
+LangGraph: A library for building stateful, multi-actor applications with LLMs.
+LangSmith: A platform for debugging, testing, and monitoring LLM applications.
+Prompt Hub: A LangSmith feature to version and manage prompt templates.
+RAGAS: A framework for automated evaluation of RAG pipelines.
+Guardrails AI: A framework to add validation and safety checks to LLM outputs.
+PII (Personally Identifiable Information): Sensitive data like emails, SSNs, or credit card numbers.

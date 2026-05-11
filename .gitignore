@@ -1,0 +1,5 @@
+# Ignore all .env files
+.env
+
+# But keep the example file
+!.env.example
