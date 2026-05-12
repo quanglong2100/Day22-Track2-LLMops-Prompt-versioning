@@ -12,201 +12,141 @@ DELIVERABLE: 2 named prompts visible in https://smith.langchain.com Prompt Hub
 """
 
 import os
-import sys
+import time
 import hashlib
 from pathlib import Path
+from dotenv import load_dotenv
 
-# ── 1. Environment / imports ────────────────────────────────────────────────
-# TODO: load .env and set LangSmith env vars (same as step 1)
-# os.environ["LANGCHAIN_TRACING_V2"] = "true"
-# os.environ["LANGCHAIN_API_KEY"]    = "<your-langsmith-api-key>"
-# os.environ["LANGCHAIN_PROJECT"]    = "<your-project-name>"
+# 1. Environment / imports
+load_dotenv()
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
-# TODO: import required libraries
-# from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-# from langchain_core.prompts import ChatPromptTemplate
-# from langchain_core.output_parsers import StrOutputParser
-# from langchain_core.runnables import RunnablePassthrough
-# from langchain_community.vectorstores import FAISS
-# from langchain_text_splitters import RecursiveCharacterTextSplitter
-# from langsmith import Client, traceable
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_community.vectorstores import FAISS
+from langsmith import Client, traceable
 
-# ── 2. Define two prompt templates ──────────────────────────────────────────
-# TODO: write PROMPT_V1 — concise, 2-4 sentence answers
-# SYSTEM_V1 = (
-#     "You are a helpful AI assistant. "
-#     "Answer the user's question using ONLY the provided context. "
-#     "Keep your answer concise (2-4 sentences). "
-#     "If the context does not contain the answer, say: 'I don't have enough information.'\n\n"
-#     "Context:\n{context}"
-# )
-# PROMPT_V1 = ChatPromptTemplate.from_messages([
-#     ("system", SYSTEM_V1),
-#     ("human",  "{question}"),
-# ])
+# ── 2. LLM / Embeddings ──
+gemini_key = os.environ.get("GEMINI_API_KEY")
+ls_client = Client() # LangSmith Client
 
-# TODO: write PROMPT_V2 — structured, expert 3-5 sentence answers
-# SYSTEM_V2 = (
-#     "You are an expert AI tutor. Provide a structured, accurate answer.\n\n"
-#     "Instructions:\n"
-#     "1. Read the context carefully.\n"
-#     "2. Identify the key facts relevant to the question.\n"
-#     "3. Write a clear, well-organized answer (3-5 sentences).\n"
-#     "4. State explicitly if the context lacks sufficient information.\n\n"
-#     "Context:\n{context}"
-# )
-# PROMPT_V2 = ChatPromptTemplate.from_messages([
-#     ("system", SYSTEM_V2),
-#     ("human",  "{question}"),
-# ])
+llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", google_api_key=gemini_key)
+embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001", google_api_key=gemini_key)
 
-# Prompt Hub names (change these to your own unique names)
-PROMPT_V1_NAME = "my-rag-prompt-v1"   # TODO: choose a unique name
-PROMPT_V2_NAME = "my-rag-prompt-v2"   # TODO: choose a unique name
+# Prompt Hub names (Must be unique - append your name/ID)
+PROMPT_V1_NAME = "rag-prompt-v1-longtran" 
+PROMPT_V2_NAME = "rag-prompt-v2-longtran"
+
+# Local definitions (used as fallbacks)
+SYSTEM_V1 = "You are a concise assistant. Answer in 1-2 sentences using ONLY the context: {context}"
+PROMPT_V1 = ChatPromptTemplate.from_messages([("system", SYSTEM_V1), ("human", "{question}")])
+
+SYSTEM_V2 = "You are an expert AI tutor. Provide a structured, well-organized answer using this context: {context}"
+PROMPT_V2 = ChatPromptTemplate.from_messages([("system", SYSTEM_V2), ("human", "{question}")])
 
 
-# ── 3. Push prompts to LangSmith Prompt Hub ──────────────────────────────────
+# ── 3. Push prompts to LangSmith Prompt Hub ──
 def push_prompts_to_hub(client):
-    """
-    Upload both prompt versions to LangSmith Prompt Hub.
-
-    Use: client.push_prompt(name, object=template, description="...")
-    The 'object' argument must be a ChatPromptTemplate instance.
-    """
-    # TODO: push PROMPT_V1
-    # try:
-    #     url = client.push_prompt(PROMPT_V1_NAME, object=PROMPT_V1, description="V1 – concise answers")
-    #     print(f"✅ Pushed V1 → {url}")
-    # except Exception as e:
-    #     print(f"⚠️  V1: {e}")
-
-    # TODO: push PROMPT_V2
-    # try:
-    #     url = client.push_prompt(PROMPT_V2_NAME, object=PROMPT_V2, description="V2 – structured answers")
-    #     print(f"✅ Pushed V2 → {url}")
-    # except Exception as e:
-    #     print(f"⚠️  V2: {e}")
-
-    pass  # remove this line when done
+    """Upload both prompt versions to LangSmith Prompt Hub."""
+    print("Pushing prompts to LangSmith Hub...")
+    try:
+        client.push_prompt(PROMPT_V1_NAME, object=PROMPT_V1, description="V1: Concise")
+        client.push_prompt(PROMPT_V2_NAME, object=PROMPT_V2, description="V2: Structured")
+        print("✅ Pushed prompts to Hub.")
+    except Exception as e:
+        print(f"ℹ️  Note: {e} (Likely already exist)")
 
 
-# ── 4. Pull prompts from Prompt Hub ─────────────────────────────────────────
+# ── 4. Pull prompts from Prompt Hub (THE PART I MISSED) ──
 def pull_prompts_from_hub(client):
-    """
-    Download both prompt versions from LangSmith Prompt Hub.
-    Fall back to local templates if Hub is unavailable.
-
-    Use: client.pull_prompt(name) → returns a ChatPromptTemplate
-    """
+    """Download both prompt versions. Fall back to local if Hub fails."""
     prompts = {}
 
-    # TODO: pull PROMPT_V1_NAME, fall back to local PROMPT_V1 on error
-    # try:
-    #     prompts[PROMPT_V1_NAME] = client.pull_prompt(PROMPT_V1_NAME)
-    #     print(f"↓ Pulled '{PROMPT_V1_NAME}' from Hub")
-    # except Exception:
-    #     prompts[PROMPT_V1_NAME] = PROMPT_V1
-    #     print(f"ℹ️  Using local fallback for '{PROMPT_V1_NAME}'")
+    # Pull V1
+    try:
+        prompts[PROMPT_V1_NAME] = client.pull_prompt(PROMPT_V1_NAME)
+        print(f"↓ Pulled '{PROMPT_V1_NAME}' from Hub")
+    except Exception:
+        prompts[PROMPT_V1_NAME] = PROMPT_V1
+        print(f"ℹ️  Using local fallback for V1")
 
-    # TODO: pull PROMPT_V2_NAME, fall back to local PROMPT_V2 on error
-    # try:
-    #     prompts[PROMPT_V2_NAME] = client.pull_prompt(PROMPT_V2_NAME)
-    #     print(f"↓ Pulled '{PROMPT_V2_NAME}' from Hub")
-    # except Exception:
-    #     prompts[PROMPT_V2_NAME] = PROMPT_V2
-    #     print(f"ℹ️  Using local fallback for '{PROMPT_V2_NAME}'")
+    # Pull V2
+    try:
+        prompts[PROMPT_V2_NAME] = client.pull_prompt(PROMPT_V2_NAME)
+        print(f"↓ Pulled '{PROMPT_V2_NAME}' from Hub")
+    except Exception:
+        prompts[PROMPT_V2_NAME] = PROMPT_V2
+        print(f"ℹ️  Using local fallback for V2")
 
     return prompts
 
 
-# ── 5. A/B routing — deterministic hash ─────────────────────────────────────
+# ── 5. A/B routing — deterministic hash ──
 def get_prompt_version(request_id: str) -> str:
-    """
-    Route a request to prompt V1 or V2 based on the MD5 hash of request_id.
-
-    Rules:
-      even hash → PROMPT_V1_NAME
-      odd  hash → PROMPT_V2_NAME
-
-    This is DETERMINISTIC: same request_id always maps to the same version.
-    """
-    # TODO: compute MD5 hash of request_id, convert to integer
-    # hash_int = int(hashlib.md5(request_id.encode()).hexdigest(), 16)
-
-    # TODO: return V1 name if even, V2 name if odd
-    # return PROMPT_V1_NAME if hash_int % 2 == 0 else PROMPT_V2_NAME
-
-    pass  # remove this line when done
+    """Route request based on MD5 hash of request_id."""
+    hash_int = int(hashlib.md5(request_id.encode()).hexdigest(), 16)
+    return PROMPT_V1_NAME if hash_int % 2 == 0 else PROMPT_V2_NAME
 
 
-# ── 6. Build vectorstore (reuse from step 1) ────────────────────────────────
-def build_vectorstore():
-    # TODO: copy your build_vectorstore() implementation from step 1
-    pass
+# ── 6. Traced A/B query function ──
+@traceable(name="ab-rag-query", tags=["ab-test", "step2"])
+def ask_ab(retriever, prompt, question: str, version_key: str) -> dict:
+    docs = retriever.invoke(question)
+    context = "\n\n".join(doc.page_content for doc in docs)
+    
+    chain = prompt | llm | StrOutputParser()
+    answer = chain.invoke({"context": context, "question": question})
+    
+    return {"question": question, "answer": answer, "version": version_key}
 
 
-# ── 7. Traced A/B query function ────────────────────────────────────────────
-# TODO: add @traceable decorator with name="ab-rag-query" and tags=["ab-test"]
-# @traceable(name="ab-rag-query", tags=["ab-test", "step2"])
-def ask_ab(retriever, llm, prompt, question: str, version: str) -> dict:
-    """
-    Run the RAG chain using the given prompt version.
-    Returns a dict: {"question": ..., "answer": ..., "version": ...}
-
-    Steps:
-      a) Retrieve top-3 docs with retriever.invoke(question)
-      b) Join their page_content into a single context string
-      c) Run (prompt | llm | StrOutputParser()).invoke({"context": ..., "question": ...})
-      d) Return the result dict
-    """
-    # TODO: retrieve docs
-    # docs = retriever.invoke(question)
-    # context = "\n\n".join(doc.page_content for doc in docs)
-
-    # TODO: run the chain
-    # answer = (prompt | llm | StrOutputParser()).invoke({"context": context, "question": question})
-
-    # TODO: return result
-    # return {"question": question, "answer": answer, "version": version}
-
-    pass  # remove this line when done
-
-
-# ── 8. Main ─────────────────────────────────────────────────────────────────
+# ── 7. Main ──
 def main():
     print("=" * 60)
-    print("  Step 2: Prompt Hub A/B Routing")
+    print("  Step 2: Prompt Hub & A/B Routing")
     print("=" * 60)
 
-    # TODO: create LangSmith client
-    # client = Client(api_key=os.environ["LANGCHAIN_API_KEY"])
+    # Infrastructure setup
+    push_prompts_to_hub(ls_client)
+    prompts = pull_prompts_from_hub(ls_client)
 
-    # TODO: push both prompts
-    # push_prompts_to_hub(client)
+    # Setup Knowledge Base
+    text = Path("data/knowledge_base.txt").read_text(errors='ignore')
+    chunks = text.split("\n")
+    vectorstore = FAISS.from_texts([c for c in chunks if c.strip()], embeddings)
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
 
-    # TODO: pull both prompts from Hub
-    # prompts = pull_prompts_from_hub(client)
+    # Pull the questions from step 1
+    # FIX: Dynamically import from a file starting with a number
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("task1", "01_langsmith_rag_pipeline.py")
+    task1 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(task1)
+    SAMPLE_QUESTIONS = task1.SAMPLE_QUESTIONS
 
-    # TODO: build vectorstore, retriever, and LLM
-    # vectorstore = build_vectorstore()
-    # retriever   = vectorstore.as_retriever(search_kwargs={"k": 3})
-    # llm         = ChatOpenAI(...)
+    print(f"\nRouting {len(SAMPLE_QUESTIONS)} questions...")
+    v1_count = 0
+    v2_count = 0
 
-    # TODO: loop over all 50 questions with A/B routing
-    # from 01_langsmith_rag_pipeline import SAMPLE_QUESTIONS
-    # for i, question in enumerate(SAMPLE_QUESTIONS):
-    #     request_id  = f"req-{i:04d}"
-    #     version_key = get_prompt_version(request_id)
-    #     version_tag = "v1" if version_key == PROMPT_V1_NAME else "v2"
-    #     prompt      = prompts[version_key]
-    #
-    #     result = ask_ab(retriever, llm, prompt, question, version_tag)
-    #     print(f"[{i+1:02d}] [prompt-{version_tag}] {question[:55]}...")
+    for i, question in enumerate(SAMPLE_QUESTIONS):
+        request_id = f"req-{i:04d}"
+        version_key = get_prompt_version(request_id)
+        prompt = prompts[version_key]
 
-    # TODO: print routing summary (how many went to V1 vs V2)
+        try:
+            res = ask_ab(retriever, prompt, question, version_key)
+            tag = "V1" if version_key == PROMPT_V1_NAME else "V2"
+            if tag == "V1": v1_count += 1 
+            else: v2_count += 1
+            
+            print(f"[{i+1:02d}/50] [prompt-{tag}] {question[:55]}...")
+        except Exception as e:
+            print(f"[{i+1:02d}/50] ERROR: {e}")
 
-    pass  # remove this line when done
+        time.sleep(5) # Respect your 15 RPM limit
 
+    print(f"\n✅ Routing Summary: V1={v1_count}, V2={v2_count}")
 
 if __name__ == "__main__":
     main()
